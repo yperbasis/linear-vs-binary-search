@@ -125,29 +125,40 @@ static TESTINLINE int binary_search_branchless_UR2(const int *arr, int n, int ke
         return 0;
 
     intptr_t pos = -1;
+    intptr_t step = -1;
 
     switch (n + 1)
     {
     case 1 << 10:
-        pos = (arr[pos + (1 << 9)] < key ? pos + (1 << 9) : pos);
+        step = 1 << 9;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 9:
-        pos = (arr[pos + (1 << 8)] < key ? pos + (1 << 8) : pos);
+        step = 1 << 8;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 8:
-        pos = (arr[pos + (1 << 7)] < key ? pos + (1 << 7) : pos);
+        step = 1 << 7;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 7:
-        pos = (arr[pos + (1 << 6)] < key ? pos + (1 << 6) : pos);
+        step = 1 << 6;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 6:
-        pos = (arr[pos + (1 << 5)] < key ? pos + (1 << 5) : pos);
+        step = 1 << 5;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 5:
-        pos = (arr[pos + (1 << 4)] < key ? pos + (1 << 4) : pos);
+        step = 1 << 4;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 4:
-        pos = (arr[pos + (1 << 3)] < key ? pos + (1 << 3) : pos);
+        step = 1 << 3;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 3:
-        pos = (arr[pos + (1 << 2)] < key ? pos + (1 << 2) : pos);
+        step = 1 << 2;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 2:
-        pos = (arr[pos + (1 << 1)] < key ? pos + (1 << 1) : pos);
+        step = 1 << 1;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 1:
-        pos = (arr[pos + (1 << 0)] < key ? pos + (1 << 0) : pos);
+        step = 1 << 0;
+        pos = (arr[pos + step] < key ? pos + step : pos);
     case 1 << 0:
         return pos + 1;
     }
@@ -161,31 +172,42 @@ static TESTINLINE int binary_search_branchless_UR3(const int *arr, int n, int ke
         return 0;
 
     intptr_t pos = -1;
+    intptr_t step = -1;
 
     switch (n + 1)
     {
     case 1 << 10:
-        return binary_search_branchless_UR<1 << 10>(arr, n, key);
+        step = 1 << 9;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 9:
-        return binary_search_branchless_UR<1 << 9>(arr, n, key);
+        step = 1 << 8;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 8:
-        return binary_search_branchless_UR<1 << 8>(arr, n, key);
+        step = 1 << 7;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 7:
-        return binary_search_branchless_UR<1 << 7>(arr, n, key);
+        step = 1 << 6;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 6:
-        return binary_search_branchless_UR<1 << 6>(arr, n, key);
+        step = 1 << 5;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 5:
-        return binary_search_branchless_UR<1 << 5>(arr, n, key);
+        step = 1 << 4;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 4:
-        return binary_search_branchless_UR<1 << 4>(arr, n, key);
+        step = 1 << 3;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 3:
-        return binary_search_branchless_UR<1 << 3>(arr, n, key);
+        step = 1 << 2;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 2:
-        return binary_search_branchless_UR<1 << 2>(arr, n, key);
+        step = 1 << 1;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 1:
-        return binary_search_branchless_UR<1 << 1>(arr, n, key);
+        step = 1 << 0;
+        pos += (arr[pos + step] < key) * step;
     case 1 << 0:
-        return binary_search_branchless_UR<1 << 0>(arr, n, key);
+        return pos + 1;
     }
 
     return std::lower_bound(arr, arr + n, key) - arr;
