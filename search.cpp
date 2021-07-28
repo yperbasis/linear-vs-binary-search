@@ -5,7 +5,12 @@
 #include <algorithm>
 #include <random>
 #include <immintrin.h>
+
+#if defined(__x86_64__)
+#include <x86intrin.h>
+#else
 #include <intrin.h>
+#endif
 
 //little-endian _MM_SHUFFLE
 #define SHUF(i0, i1, i2, i3) (i0 + i1*4 + i2*16 + i3*64)
@@ -111,6 +116,42 @@ template<intptr_t MAXN> static TESTINLINE int binary_search_branchless_UR (const
     STEP(0)
     #undef STEP
     return pos + 1;
+}
+
+static TESTINLINE int binary_search_branchless_UR2(const int *arr, int n, int key)
+{
+    if (n == 0)
+        return 0;
+
+    intptr_t pos = -1;
+
+    switch (n + 1)
+    {
+    case 1 << 10:
+        pos = (arr[pos + (1 << 9)] < key ? pos + (1 << 9) : pos);
+    case 1 << 9:
+        pos = (arr[pos + (1 << 8)] < key ? pos + (1 << 8) : pos);
+    case 1 << 8:
+        pos = (arr[pos + (1 << 7)] < key ? pos + (1 << 7) : pos);
+    case 1 << 7:
+        pos = (arr[pos + (1 << 6)] < key ? pos + (1 << 6) : pos);
+    case 1 << 6:
+        pos = (arr[pos + (1 << 5)] < key ? pos + (1 << 5) : pos);
+    case 1 << 5:
+        pos = (arr[pos + (1 << 4)] < key ? pos + (1 << 4) : pos);
+    case 1 << 4:
+        pos = (arr[pos + (1 << 3)] < key ? pos + (1 << 3) : pos);
+    case 1 << 3:
+        pos = (arr[pos + (1 << 2)] < key ? pos + (1 << 2) : pos);
+    case 1 << 2:
+        pos = (arr[pos + (1 << 1)] < key ? pos + (1 << 1) : pos);
+    case 1 << 1:
+        pos = (arr[pos + (1 << 0)] < key ? pos + (1 << 0) : pos);
+    case 1 << 0:
+        return pos + 1;
+    }
+
+    return std::lower_bound(arr, arr + n, key) - arr;
 }
 
 static TESTINLINE int linear_search_scalar (const int *arr, int n, int key) {
@@ -454,12 +495,13 @@ int main() {
         res[sk++] = binary_search_branchless(arr, n, key);
         res[sk++] = binary_search_branchless_UR<SIZE>(arr, n, key);
         //some experimental implementations:
+        res[sk++] = binary_search_branchless_UR2(arr, n, key);
         res[sk++] = hybridX_search(arr, n, key);
         res[sk++] = binary_search_branchlessM(arr, n, key);
         res[sk++] = binary_search_branchlessA(arr, n, key);
         res[sk++] = binary_search_branchlessS(arr, n, key);
         res[sk++] = binary_search_branchless_pre(arr, n, key);
-        res[sk++] = quaternary_search_branchless(arr, n, key);
+        res[sk++] = quaternary_search_branchless(arr, n, key);     
 
         //program terminates if any search gives different answer
         for (int i = 1; i < sk; i++)
@@ -514,6 +556,7 @@ int main() {
     TEST_SEARCH(binary_search_branchless_UR<SIZE>);
 
     //some experimental implementations:
+    TEST_SEARCH(binary_search_branchless_UR2);
     TEST_SEARCH(hybridX_search);
 
     TEST_SEARCH(binary_search_branchlessM);
@@ -522,6 +565,6 @@ int main() {
 
     TEST_SEARCH(binary_search_branchless_pre);
     TEST_SEARCH(quaternary_search_branchless);
-
+   
     return 0;
 }
