@@ -260,6 +260,28 @@ static TESTINLINE int binary_search_branchless_UR4(const int *arr, int n, int ke
     return std::lower_bound(arr, arr + n, key) - arr;
 }
 
+#define INTX_UNLIKELY(EXPR) __builtin_expect(bool{EXPR}, false)
+
+static TESTINLINE int branchless_binary_search(const int* arr, int n, int key)
+{
+    if (INTX_UNLIKELY(n == 0))
+        return 0;
+
+    int pos = -1;
+    const unsigned logstep = bsr(n);
+    int step = 1 << logstep;
+    const int range1 = static_cast<int>(n + 1) - step;
+    pos += (arr[pos + range1] < key) * range1;
+    // later on range is the same as step
+    step >>= 1;
+    while (step > 0)
+    {
+        pos = (arr[pos + step] < key ? pos + step : pos);
+        step >>= 1;
+    }
+    return pos + 1;
+}
+
 static TESTINLINE int linear_search_scalar (const int *arr, int n, int key) {
     int cnt = 0;
     for (int i = 0; i < n; i++)
@@ -589,8 +611,8 @@ int main() {
         int key = keys[t % KEY_SAMPLES] = distr(rnd);
 
         int res[32], sk = 0;
-        //res[sk++] = linearX_search_scalar(arr, n, key);
-        //res[sk++] = linear_search_scalar(arr, n, key);
+        res[sk++] = linearX_search_scalar(arr, n, key);
+        res[sk++] = linear_search_scalar(arr, n, key);
         res[sk++] = linearX_search_sse(arr, n, key);
         res[sk++] = linear_search_sse(arr, n, key);
         res[sk++] = linear_search_sse_UR<SIZE>(arr, n, key);
@@ -604,6 +626,7 @@ int main() {
         res[sk++] = binary_search_branchless_UR2(arr, n, key);
         res[sk++] = binary_search_branchless_UR3(arr, n, key);
         res[sk++] = binary_search_branchless_UR4(arr, n, key);
+        res[sk++] = branchless_binary_search(arr, n, key);
         res[sk++] = hybridX_search(arr, n, key);
         res[sk++] = binary_search_branchlessM(arr, n, key);
         res[sk++] = binary_search_branchlessA(arr, n, key);
@@ -649,8 +672,8 @@ int main() {
     }
 
     //run performance benchmark and print formatted results
-    //TEST_SEARCH(linearX_search_scalar);
-    //TEST_SEARCH(linear_search_scalar);
+    TEST_SEARCH(linearX_search_scalar);
+    TEST_SEARCH(linear_search_scalar);
 
     TEST_SEARCH(linearX_search_sse);
     TEST_SEARCH(linear_search_sse);
@@ -667,6 +690,7 @@ int main() {
     TEST_SEARCH(binary_search_branchless_UR2);
     TEST_SEARCH(binary_search_branchless_UR3);
     TEST_SEARCH(binary_search_branchless_UR4);
+    TEST_SEARCH(branchless_binary_search);
     TEST_SEARCH(hybridX_search);
 
     TEST_SEARCH(binary_search_branchlessM);
